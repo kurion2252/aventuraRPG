@@ -2,7 +2,7 @@
 
 const dañoBAse = 20;
 let player = prompt("¿Cual es tu nombre, Aventurer@?");
-let healtp = 10000;
+let healtp = 100;
 let nivelp = 1;
 let healten = 100;
 let damageen = 10
@@ -10,7 +10,10 @@ let damageen = 10
 
 //enemigos //
 
-let enemigos = [{nombre: "Goblin", healten: 30, damageen: 5 }, {nombre: "Hobgoblin", healten: 60, damageen: 10}, {nombre: "Lobo", healten: 40, damageen: 15}];
+let enemigos = [
+    {nombre: "Goblin", healten: 30, damageen: 5 }, 
+    {nombre: "Hobgoblin", healten: 60, damageen: 10},
+    {nombre: "Lobo", healten: 40, damageen: 15}];
 
 function atacar(enemigo) {
     alert (`${player} ataca al ${enemigo.nombre}!`);
