@@ -3,13 +3,35 @@
 <head>
     <meta charset="UTF-8" />
     <title>Aventura RPG</title>
+    <link rel="stylesheet" href="./estilos/css/estilos.css">
+
 </head>
 <body>
-    <h1>¡Bienvenido a la gran Aventura!</h1>
-    <p>para empezar la historia, abri la consola.</p>
-    <p>Que lo disfrutes</p>
+<h1> Las aventuras de chase, el caballero</h1>
+<article class="hud">
+    <div class="lifebar"><div id="life" class="relleno"></div></div>
+    <div class="manabar"><div id="mana" class="relleno"></div></div>
+    <div class="levelbar"><div id="level" class="relleno"></div></div>
+</article>
+<article class="cuadro-central">
+    <h2 id="playername"> Nombre del jugador</h2>
+    <img src="./imagenes/goblin_arquero.png" alt="Enemigo">
+    <p id="mensaje">¡Un enemigo a aparecido!</p>
+    <div class="botones">
+        <button onclick="atacar()">Atacar</button>
+        <button onclick="defender()">Defender</button>
+        <button onclick="huir()">Huir</button>
+        <button onclick="curar()">Curar</button>
+        <button onclick="magia()">Magia</button>
+    </div>
+    <div class="botones">
+        <button id="reiniciar">Reiniciar</button>
+        <button id="guardar">Guardar</button>
+        <button id="cargar">Cargar</button>
+        <button id="salir">Salir</button>
+    </div>      
 
-
+</article>
     <script src="/js/aventura.js"></script>
 </body>
 </html>
