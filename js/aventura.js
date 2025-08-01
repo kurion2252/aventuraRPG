@@ -41,7 +41,7 @@ function Enemigo(nombre, daño, defensa, salud, nivel) {
 let jugador = new Jugador("Heroe", 25, 15, 100, 1);
 
 let enemigos = [
-    new Enemigo("goblin con espada", 5, 5, 15, 1),
+    new Enemigo("goblin con espada", 30, 5, 15, 1),
     new Enemigo("goblin arquero", 7, 5, 20, 3),
     new Enemigo("Hechicero goblin", 10, 5, 20, 5),
     new Enemigo("hobgoblin", 20, 15, 30, 11),
@@ -68,7 +68,38 @@ for (let i = 0; i < enemigos.length; i++) {
         continue;
     } else if(accion === "4"){ 
         alert("Has huido del combate! los enemigos celebran la victoria...");
+        break
+    } else {
+        alert("Acción no válida, intenta de nuevo.");
+        continue;
     }
+
+    // turno del enemigo si sigue vivo
+    if (enemigo.vida > 0) {
+    let dañorecibido = enemigo.daño - jugador.defensa;
+    if (dañorecibido < 0) dañorecibido = 0; 
+    
+    jugador.vida -= dañorecibido; // resta el daño al jugador
+    alert(`${enemigo.nombre} ataca a ${jugador.nombre} y le causa ${dañoEnemigo} puntos de daño.`);
+    if (jugador.vida <= 0) {
+        alert(`${jugador.nombre} ha sido derrotado por ${enemigo.nombre}. Fin del juego.`);
+        break;
+    } else {
+        alert(`${jugador.nombre} tiene ${jugador.vida} puntos de vida restantes.`);
+        jugador.nivel += 1; // aumenta el nivel del jugador
+        jugador.daño += 5; // aumenta el daño del jugador
+        jugador.defensa += 2; // aumenta la defensa del jugador
+        jugador.vida = Math.min(jugador.vida + 10, 100); // recupera vida hasta un máximo de 100
+        alert(`${jugador.nombre} ha subido de nivel! Ahora es nivel ${jugador.nivel}.`);
+    }
+    }   
+
+    if (jugador.vida <= 0) {
+        break;
+    }
+  } // <-- This closes the while loop properly
+}
+
 //estadisticas del jugador y enemigos
 const estadisticasJugador = () => {
     console.log(`Jugador: ${jugador.nombre}`);
@@ -79,4 +110,4 @@ const estadisticasEnemigos = () => {
         console.log(`Enemigo: ${enemigo.nombre}`);
         console.log(`Nivel: ${enemigo.nivel} | Vida: ${enemigo.vida} | Daño: ${enemigo.daño} | Defensa: ${enemigo.defensa}`);
     });
-}
+};
