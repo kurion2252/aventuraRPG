@@ -42,19 +42,21 @@ h1,h2 {
 }
 
 h1 {
-  font-size: 3rem;
+  font-size: 5rem;
   color: #ffd700;
   text-shadow: 2px 2px 5px #000000;
+  font-style: italic;
 }
 
-h2{
-  font-size: 1.5rem;
-  color: #cccccc;
-}
 
 #descripcion {
-  background-color: #555;
+  background-color: #000000b3;
   text-align: center;
+  color: #90ee90;
+  border-radius: 10px;
+  padding: 10px;
+  max-width: 800px;
+  margin: 10px auto;
 }
 
 /*menu del usuario*/
@@ -67,8 +69,8 @@ h2{
 }
 
 #Menu-partida button {
-  background-color: #444;
-  color: white;
+  background-color: #000000b3;
+  color: #90ee90;
   border: 2px solid #666;
   padding: 8px 15px;
   cursor: pointer;
@@ -151,4 +153,12 @@ border-bottom: 1px solid #555;}
 
 #acciones-combate button:hover {
   background-color: #dc143c;
+}
+
+/*footer*/
+.creditos {
+  text-align: center;
+  margin: 20px 0;
+  color: #000000;
+  font-size: 0.9rem;
 }
