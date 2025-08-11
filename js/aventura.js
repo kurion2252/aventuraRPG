@@ -64,9 +64,13 @@ let cargarpartida = () => {
     let indexGuardado = localStorage.getItem("enemigoIndex");
 
     if (jugadorGuardado && enemigosGuardados) {
-        jugador = JSON.parse(jugadorGuardado);
-        enemigos = JSON.parse(enemigosGuardados);
-        enemigoActualIndex = parseInt(indexGuardado);
+        let datosJugador = JSON.parse(jugadorGuardado);
+        jugador = new Jugador( datosJugador.nombre, datosJugador.daño, datosJugador.defensa, datosJugador.vida, datosJugador.nivel);
+        enemigos = JSON.parse(enemigosGuardados).map(
+            (e) => new Enemigo(e.nombre, e.daño, e.defensa, e.vida, e.nivel)
+        );
+        
+        enemigoActualIndex = parseInt(indexGuardado, 10);
         enemigoActual = enemigos[enemigoActualIndex];
         registrarEnHistorial("Partida cargada exitosamente.");
         actualizarUI();
@@ -96,7 +100,11 @@ function actualizarUI() {
 function registrarEnHistorial(mensaje) {
     const li = document.createElement("li");
     li.textContent = mensaje;
-    document.getElementById("historial").appendChild(li);
+    const historial = document.getElementById("historial");
+    historial.appendChild(li);
+    while (historial.children.length > 15) {
+        historial.removeChild(historial.firstChild);
+    }
 }
 
 // ==== TURNO DEL ENEMIGO ====
