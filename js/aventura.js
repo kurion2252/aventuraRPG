@@ -1,196 +1,201 @@
-// simulador RPG interactivo //
+// simulador RPG interactivo adaptado a DOM y eventos
+// Autor: Brian (adaptado para entrega curso)
 
-// Autor: [Brian]
-// funciones constructoras para jugador
+// ==== FUNCIONES CONSTRUCTORAS ====
 function Jugador(nombre, daño, defensa, vida, nivel) {
-  this.nombre = nombre;
-  this.daño = daño;
-  this.defensa = defensa;
-  this.vida = vida;
-  this.nivel = nivel;
+    this.nombre = nombre;
+    this.daño = daño;
+    this.defensa = defensa;
+    this.vida = vida;
+    this.nivel = nivel;
 
-  this.atacar = function (enemigos) {
-    let dañoreal = this.daño - enemigos.defensa;
-    if (dañoreal < 0) dañoreal = 0; // daño mínimo
-    enemigos.vida -= dañoreal; // resta el daño al enemigo
-    return `${this.nombre} ataca a ${enemigos.nombre} y le causa ${dañoreal} puntos de daño.`;
-  };
+    this.atacar = function (enemigos) {
+        let dañoreal = this.daño - enemigos.defensa;
+        if (dañoreal < 0) dañoreal = 0;
+        enemigos.vida -= dañoreal;
+        return `${this.nombre} ataca a ${enemigos.nombre} y le causa ${dañoreal} puntos de daño.`;
+    };
 
-  this.curarse = function () {
-    if (this.defensa >= 5) {
-      this.vida += 20; // curación si la defensa es alta
-      if (this.vida > 100) this.vida = 100; // máximo de vida
-      this.defensa -= 5; // reduce defensa al curarse
-      return `${this.nombre} se cura 20 puntos de vida. Ahora tiene ${this.vida} puntos de vida y su defensa ha bajado a ${this.defensa}.`;
-    } else {
-      return `${this.nombre} no puede curarse porque su defensa es baja.`;
-    }
-  };
+    this.curarse = function () {
+        if (this.defensa >= 5) {
+            this.vida += 20;
+            if (this.vida > 100) this.vida = 100;
+            this.defensa -= 5;
+            return `${this.nombre} se cura 20 puntos de vida. Ahora tiene ${this.vida} puntos de vida y su defensa ha bajado a ${this.defensa}.`;
+        } else {
+            return `${this.nombre} no puede curarse porque su defensa es baja.`;
+        }
+    };
 }
-/* 
-    No hay código en el $PLACEHOLDER$ actualmente. 
-    Si necesitas agregar una función, lógica adicional o corregir algo, por favor indícalo.
-*/
-// funciones constructoras para enemigos
+
 function Enemigo(nombre, daño, defensa, salud, nivel) {
-  this.nombre = nombre;
-  this.daño = daño;
-  this.defensa = defensa;
-  this.vida = salud;
-  this.nivel = nivel;
+    this.nombre = nombre;
+    this.daño = daño;
+    this.defensa = defensa;
+    this.vida = salud;
+    this.nivel = nivel;
 }
 
-// crear jugadoor y enemigos
-let nombreJugador = prompt("Introduce el nombre de tu personaje:");
-if (!nombreJugador) {
-  nombreJugador = "Heroe"; // nombre por defecto si no se ingresa uno
-}
-// crear instancia del jugador
-// con valores predeterminados
-// puedes cambiar estos valores según tu preferencia
-let jugador = new Jugador(nombreJugador, 25, 15, 100, 1);
-
+// ==== CREAR JUGADOR Y ENEMIGOS ====
+let jugador;
 let enemigos = [
-  new Enemigo("goblin con espada", 30, 5, 60, 1),
-  new Enemigo("goblin arquero", 25, 20, 20, 3),
-  new Enemigo("Hechicero goblin", 10, 5, 20, 5),
-  new Enemigo("hobgoblin", 20, 15, 30, 11),
-  new Enemigo("Sabio goblin", 40, 20, 30, 15),
-  new Enemigo("Rey goblin", 60, 55, 50, 20),
-  new Enemigo("Lobo", 4, 2, 10, 2),
+    new Enemigo("goblin con espada", 30, 5, 60, 1),
+    new Enemigo("goblin arquero", 25, 20, 20, 3),
+    new Enemigo("Hechicero goblin", 10, 5, 20, 5),
+    new Enemigo("hobgoblin", 20, 15, 30, 11),
+    new Enemigo("Sabio goblin", 40, 20, 30, 15),
+    new Enemigo("Rey goblin", 60, 55, 50, 20),
+    new Enemigo("Lobo", 4, 2, 10, 2),
 ];
+let enemigoActualIndex = 0;
+let enemigoActual = enemigos[enemigoActualIndex];
 
-//bandera de huida
+// ==== GUARDAR Y CARGAR PARTIDA ====
+let guardarPartida = () => {
+    localStorage.setItem("jugador", JSON.stringify(jugador));
+    localStorage.setItem("enemigos", JSON.stringify(enemigos));
+    localStorage.setItem("enemigoIndex", enemigoActualIndex);
+    registrarEnHistorial("Partida guardada exitosamente.");
+};
+
+let cargarpartida = () => {
+    let jugadorGuardado = localStorage.getItem("jugador");
+    let enemigosGuardados = localStorage.getItem("enemigos");
+    let indexGuardado = localStorage.getItem("enemigoIndex");
+
+    if (jugadorGuardado && enemigosGuardados) {
+        jugador = JSON.parse(jugadorGuardado);
+        enemigos = JSON.parse(enemigosGuardados);
+        enemigoActualIndex = parseInt(indexGuardado);
+        enemigoActual = enemigos[enemigoActualIndex];
+        registrarEnHistorial("Partida cargada exitosamente.");
+        actualizarUI();
+    } else {
+        registrarEnHistorial("No hay partidas guardadas.");
+    }
+};
+
+// ==== BANDERA DE HUIDA ====
 let abandono = false;
 
-//bucle principal peleas
+// ==== ACTUALIZAR INTERFAZ ====
+function actualizarUI() {
+    document.getElementById("Jnombre").innerText = jugador.nombre;
+    document.getElementById("Jnivel").innerText = `Nivel: ${jugador.nivel}`;
+    document.getElementById("Jvida").innerText = `Vida: ${jugador.vida}`;
+    document.getElementById("Jdefensa").innerText = `Defensa: ${jugador.defensa}`;
+    document.getElementById("Jmana").innerText = `Daño: ${jugador.daño}`;
 
-for (let i = 0; i < enemigos.length; i++) {
-  let enemigo = enemigos[i];
-  alert(`Un ${enemigo.nombre} salvaje aparece!`);
-  while (enemigo.vida > 0 && jugador.vida > 0) {
-    let accion = prompt(
-      `¿Qué deseas hacer con ${enemigo.nombre}?\n` +
-        `1- Atacar\n2 - Curarse\n3 - ver Estado\n4 - Huir`
-    );
+    document.getElementById("Enombre").innerText = enemigoActual.nombre;
+    document.getElementById("Enivel").innerText = `Nivel: ${enemigoActual.nivel}`;
+    document.getElementById("Evida").innerText = `Vida: ${enemigoActual.vida}`;
+    document.getElementById( "Edefensa").innerText = `Defensa: ${enemigoActual.defensa}`;
+    document.getElementById("Emana").innerText = `Daño: ${enemigoActual.daño}`;
+}
 
-    if (accion === "1") {
-      alert(jugador.atacar(enemigo));
-      if (enemigo.vida <= 0) {
-        alert(`${enemigo.nombre} ha sido derrotado!`);
-        jugador.nivel++;
-        jugador.vida += 10; // aumenta la vida del jugador al subir de nivel
-        jugador.daño += 5; // aumenta el daño del jugador al subir de nivel
-        jugador.defensa += 2; // aumenta la defensa del jugador al subir de nivel
-        alert(
-          `${jugador.nombre} ha subido de nivel! Ahora es nivel ${jugador.nivel}.`
-        );
-        break; // salir del bucle si el enemigo es derrotado
-      }
+function registrarEnHistorial(mensaje) {
+    const li = document.createElement("li");
+    li.textContent = mensaje;
+    document.getElementById("historial").appendChild(li);
+}
 
-      let dañorecibido = enemigo.daño - jugador.defensa;
-      if (dañorecibido < 0) dañorecibido = 0;
-      jugador.vida -= dañorecibido; // resta el daño al jugador
-      alert(
-        `${enemigo.nombre} ataca a ${jugador.nombre} y le causa ${dañorecibido} puntos de daño.`
-      );
-      if (jugador.vida <= 0) {
-        alert(
-          `${jugador.nombre} ha sido derrotado por ${enemigo.nombre}. Fin del juego.`
-        );
-        break; // salir del bucle si el jugador es derrotado
-      }
-      alert(
-        `${jugador.nombre} tiene ${jugador.vida} puntos de vida restantes.`
-      );
-    } else if (accion === "2") {
-      alert(jugador.curarse());
-    } else if (accion === "3") {
-      alert(
-        `${jugador.nombre} - Nv. ${jugador.nivel}\n` +
-          `salud: ${jugador.vida} | Daño: ${jugador.daño} | Defensa: ${jugador.defensa}\n\n` +
-          `${enemigo.nombre} - NV. ${enemigo.nivel}\n` +
-          `Salud: ${enemigo.vida} | Daño: ${enemigo.daño} | Defensa: ${enemigo.defensa}`
-      );
-      continue;
-    } else if (accion === "4") {
-      alert("Has huido del combate! los enemigos celebran la victoria...");
-      abandono = true;
-      break;
-    } else {
-      alert("Acción no válida, intenta de nuevo.");
-      continue;
-    }
-
-    //estadisticas del jugador y enemigos
-    const estadisticasJugador = () => {
-      console.log(`Jugador: ${jugador.nombre}`);
-      console.log(
-        `Nivel: ${jugador.nivel} | Vida: ${jugador.vida} | Daño: ${jugador.daño} | Defensa: ${jugador.defensa}`
-      );
-    };
-    const estadisticasEnemigos = () => {
-      enemigos.forEach((enemigo) => {
-        console.log(`Enemigo: ${enemigo.nombre}`);
-        console.log(
-          `Nivel: ${enemigo.nivel} | Vida: ${enemigo.vida} | Daño: ${enemigo.daño} | Defensa: ${enemigo.defensa}`
-        );
-      });
-    };
-
-    // ver si el enemigo sigue vivo
-    if (enemigo.vida <= 0) {
-      alert(`${enemigo.nombre} ha sido derrotado!`);
-      // subir de nivel al jugador si el enemigo es derrotado
-      jugador.nivel++;
-      jugador.vida += 10; // aumenta la vida del jugador al subir de nivel
-      jugador.daño += 5; // aumenta el daño del jugador al subir de nivel
-      jugador.defensa += 2; // aumenta la defensa del jugador al subir de nivel
-      alert(
-        `${jugador.nombre} ha subido de nivel! Ahora es nivel ${jugador.nivel}.`
-      );
-      estadisticasJugador();
-
-      // turno del enemigo si sigue vivo
-      if (enemigo.vida > 0) {
-        let dañorecibido = enemigo.daño - jugador.defensa;
+// ==== TURNO DEL ENEMIGO ====
+function turnoEnemigo() {
+    if (enemigoActual.vida > 0) {
+        let dañorecibido = enemigoActual.daño - jugador.defensa;
         if (dañorecibido < 0) dañorecibido = 0;
-
-        jugador.vida -= dañorecibido; // resta el daño al jugador
-        alert(
-          `${enemigo.nombre} ataca a ${jugador.nombre} y le causa ${enemigo.daño} puntos de daño.`
+        jugador.vida -= dañorecibido;
+        registrarEnHistorial(
+            `${enemigoActual.nombre} ataca a ${jugador.nombre} y le causa ${dañorecibido} puntos de daño.`
         );
         if (jugador.vida <= 0) {
-          alert(
-            `${jugador.nombre} ha sido derrotado por ${enemigo.nombre}. Fin del juego.`
-          );
-          break;
-        } else {
-          alert(
-            `${jugador.nombre} tiene ${jugador.vida} puntos de vida restantes.`
-          );
+            registrarEnHistorial(
+                `${jugador.nombre} ha sido derrotado por ${enemigoActual.nombre}. Fin del juego.`
+            );
+            desactivarBotones();
         }
-        // ver si el enemigo sigue vivo
-        if (enemigo.vida <= 0) {
-          alert(`${enemigo.nombre} ha sido derrotado!`);
-          // subir de nivel al jugador si el enemigo es derrotado
-          jugador.nivel++;
-          jugador.vida += 10; // aumenta la vida del jugador al subir de nivel
-          jugador.daño += 5; // aumenta el daño del jugador al subir de nivel
-          jugador.defensa += 2; // aumenta la defensa del jugador al subir de nivel
-          alert(
-            `${jugador.nombre} ha subido de nivel! Ahora es nivel ${jugador.nivel}.`
-          );
-          estadisticasJugador();
-        }
-      }
-      if (jugador.vida <= 0 || abandono) {
-        break;
-      } // <-- This closes the while loop properly
     }
-  }
-  if (abandono) break;
-  if (jugador.vida <= 0 || abandono) {
-    break; // Termina el for si el jugador muere o huye
-  }
+    actualizarUI();
 }
+
+// ==== CAMBIO DE ENEMIGO ====
+function siguienteEnemigo() {
+    enemigoActualIndex++;
+    if (enemigoActualIndex < enemigos.length) {
+        enemigoActual = enemigos[enemigoActualIndex];
+        registrarEnHistorial(`¡Aparece un nuevo enemigo: ${enemigoActual.nombre}!`);
+        actualizarUI();
+    } else {
+        registrarEnHistorial(
+            "¡Has derrotado a todos los enemigos! Victoria total."
+        );
+        desactivarBotones();
+    }
+}
+
+// ==== EVENTOS DE BOTONES ====
+document.getElementById("atacar").addEventListener("click", () => {
+    registrarEnHistorial(jugador.atacar(enemigoActual));
+    if (enemigoActual.vida <= 0) {
+        registrarEnHistorial(`${enemigoActual.nombre} ha sido derrotado.`);
+        jugador.nivel++;
+        jugador.vida += 10;
+        jugador.daño += 5;
+        jugador.defensa += 2;
+        siguienteEnemigo();
+    } else {
+        turnoEnemigo();
+    }
+    actualizarUI();
+});
+
+document.getElementById("curar").addEventListener("click", () => {
+    registrarEnHistorial(jugador.curarse());
+    turnoEnemigo();
+    actualizarUI();
+});
+
+document.getElementById("huir").addEventListener("click", () => {
+    registrarEnHistorial(
+        `${jugador.nombre} huye del combate. Los enemigos celebran...`
+    );
+    abandono = true;
+    desactivarBotones();
+});
+
+document.getElementById("defender").addEventListener("click", () => {
+    jugador.defensa += 5;
+    registrarEnHistorial(
+        `${jugador.nombre} se pone en posición defensiva. Defensa +5 este turno.`
+    );
+    turnoEnemigo();
+    jugador.defensa -= 5;
+    actualizarUI();
+});
+
+document
+    .getElementById("guardar-partidas")
+    .addEventListener("click", guardarPartida);
+document
+    .getElementById("cargar-partida")
+    .addEventListener("click", cargarpartida);
+
+// ==== DESACTIVAR BOTONES ====
+function desactivarBotones() {
+    document
+        .querySelectorAll("#acciones-combate button")
+        .forEach((boton) => (boton.disabled = true));
+}
+
+// ==== INICIO DEL JUEGO ====
+let nombreJugador = prompt("Introduce el nombre de tu personaje:");
+if (!nombreJugador) {
+    nombreJugador = "Heroe";
+}
+jugador = new Jugador(nombreJugador, 25, 15, 100, 1);
+actualizarUI();
+registrarEnHistorial(`Comienza la aventura de ${jugador.nombre}...`);
+
+// ==== FUNCIÓN DE ORDEN SUPERIOR (ejemplo para entrega) ====
+console.log("Lista de enemigos:");
+enemigos.map((e) => e.nombre).forEach((nombre) => console.log(nombre));

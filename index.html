@@ -1,13 +1,87 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8" />
     <title>Aventura RPG</title>
-    <link rel="stylesheet" href="./estilos/css/estilos.css">
+    <link rel="stylesheet" href="./estilos/css/style.css">
 
 </head>
+
 <body>
-<h1> Las aventuras de chase, el caballero</h1>
-<script src="./js/aventura.js"></script>
+    <header>
+        <div id="campo-batalla"
+            style="position: relative; background-image: url(https://res.cloudinary.com/dseriytpl/image/upload/v1754877620/fondo_batalla_hqefgt.webp); background-size: cover; height: 300px;">
+            <img src="https://res.cloudinary.com/dseriytpl/image/upload/v1754841124/heroe_xnuewm.jpg" alt="heroe"
+                style="position: absolute; bottom: 0;left: 10%;max-height: 250px;">
+            <img src="https://res.cloudinary.com/dseriytpl/image/upload/v1754758866/villano_srglbe.jpg" alt="villano"
+                style="position: absolute; bottom: 0; right: 10%; max-height: 250px;">
+        </div>
+        <h1> Soulgram</h1>
+        <h2>Bienvenidos a Soulgram</h2>
+        <p id="descripcion">Un juego de rol de aventuras en un mundo de fantasía épico.</p>
+
+        <!--Botones de partida-->
+        <div id="Menu-partida">
+            <button id="guardar-partidas">Guardar Partida</button>
+            <button id="cargar-partida">Cargar partida</button>
+            <button id="inventario"> Inventario</button>
+            <button id="habilidades"> Habilidades</button>
+        </div>
+        <!-- estadisticas del jugador y enemigoscon actualizacion de el .js-->
+        <div id="contenedor-principal" class="juego">
+            <div class="estadisticas">
+                <ul id="estadisticas-jugador">
+                    <li id="Jnombre"><h3>Nombre del jugador</h3></li>
+                    <li id="Jnivel"><p>Nivel</p></li>
+                    <li id="Jvida"><p>vida</p></li>
+                    <li id="Jdefensa"><p>Defensa</p></li>
+                    <li id="Jmana"><p>Daño</p></li>
+                </ul>
+            </div>
+            <div class="estadisticas">
+                <ul id="estadisticas-enemigo">
+                    <li id="Enombre"> <h3> Nombre del enemigo</h3></li>
+                    <li id="Enivel"><p>Nivel</p></li>
+                    <li id="Evida"><p>Vida</p></li>
+                    <li id="Edefensa"><p>Defensa</p></li>
+                    <li id="Emana"><p>Daño</p></li>
+                </ul>
+            </div>
+        </div>
+
+    <!--historial de combate-->
+        <div id="historial-combate">
+            <h3>historial de combate</h3>
+            <ul id="historial">
+                <!--aca aparecerian el log de combate-->
+            </ul>
+        </div>
+
+    <!--boyones de combate-->
+    <div id="acciones-combate" class="acciones">
+        <button id="atacar">Atacar</button>
+        <button id="defender">Defender</button>
+        <button id="curar">Cuar</button>
+        <button id="huir">Huir</button>
+    </div>
+    </header>
+
+    
+    <footer>
+        <div class="musicback">
+            <audio controls loop>
+                <source src="*" type="audio/mpeg">
+                Tu navegador no soporta el elemento de audio.
+            </audio>
+        </div>
+        <div class="creditos">
+            <p>© Aventura RPG 2025</p>  
+            <p>Desarrollado por: Brian </p>
+
+    </footer>
+
+    <script src="./js/aventura.js"></script>
 </body>
+
 </html>

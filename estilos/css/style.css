@@ -1,0 +1,154 @@
+body {
+  background-color: #ffffff;
+  background: url(https://res.cloudinary.com/dseriytpl/image/upload/v1754840558/fondo_pagina_dq8fb9.jpg) no-repeat center center fixed;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+  margin: 0;
+  padding: 0;
+  font-family: 'Trebuchet MS', Arial, sans-serif;
+}
+
+/*campo de batalla*/
+#campo-batalla {
+  position: relative;
+  background-image: url(https://res.cloudinary.com/dseriytpl/image/upload/v1754877620/fondo_batalla_hqefgt.webp) ;
+  background-size: cover;
+  background-position: center;
+  height: 300px;
+  border-bottom: 4px solid #333;
+}
+
+#campo-batalla img {
+  position: absolute;
+  bottom: 0;
+  max-height: 250px;
+}
+
+#campo-batalla img[alt="heroe¨"]{
+  left: 10%;
+} 
+
+#campo-batalla img[alt="villano¨"]{
+  right: 10%;
+} 
+
+/*titulos*/
+
+h1,h2 {
+  text-align: center;
+  margin: 10px 0;
+}
+
+h1 {
+  font-size: 3rem;
+  color: #ffd700;
+  text-shadow: 2px 2px 5px #000000;
+}
+
+h2{
+  font-size: 1.5rem;
+  color: #cccccc;
+}
+
+#descripcion {
+  background-color: #555;
+  text-align: center;
+}
+
+/*menu del usuario*/
+
+#Menu-partida{
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 15px 0;
+}
+
+#Menu-partida button {
+  background-color: #444;
+  color: white;
+  border: 2px solid #666;
+  padding: 8px 15px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+#Menu-partida button:hover {
+  background-color: #666;
+}
+
+/*contenedor de estadisitcas*/
+#contenedor-principal {
+  display: flex;
+  justify-content: center;
+  margin: 20px auto;
+  max-width: 800px;
+}
+
+.estadisticas{
+  background-color: #000000b3;
+  padding: 10px;
+  border-radius: 10px;
+  width: 45%;
+}
+
+.estadisticas ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.estadisticas li {
+padding: 5px;
+border-bottom: 1px solid #555;}
+
+.estadisticas li, .estadisticas h3 , .estadisticas p {
+  color: #90ee90;
+}
+/*historial de batallas*/
+#historial-combate {
+  max-width: 800px;
+  margin: 20px auto;
+  background-color: #000000b3;
+  padding: 10px;
+  border-radius: 10px;
+}
+#historial-combate ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  color: #90ee90;
+}
+
+#historial-combate h3 {
+  margin-top: 0;
+  text-align: center;
+  color: #90ee90;
+}
+
+#historial {
+  max-height: 300px;
+  overflow-y: auto;
+  padding-left: 10px;
+}
+
+/*botones de acciones*/
+#acciones-combate {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin: 20px auto;
+}
+#acciones-combate button {
+  background-color: #8b0000;
+  color: #ffffff;
+  border: 2px solid #666;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+#acciones-combate button:hover {
+  background-color: #dc143c;
+}
