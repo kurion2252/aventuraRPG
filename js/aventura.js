@@ -1,7 +1,14 @@
 // simulador RPG interactivo adaptado a DOM y eventos
 // Autor: Brian (adaptado para entrega curso)
 
-// ==== FUNCIONES CONSTRUCTORAS ====
+
+// =============================== mensajes iniciales ===============================
+// sweetalert2 para prompts y alertas
+swal.fire("Bienvenido al juego de aventura RPG!");
+swal.fire("Instrucciones: Ataca, cura, defiende o huye. ¡Buena suerte!");
+
+
+//=============================== funciones constructoras ================================
 function Jugador(nombre, daño, defensa, vida, nivel) {
     this.nombre = nombre;
     this.daño = daño;
@@ -35,6 +42,9 @@ function Enemigo(nombre, daño, defensa, salud, nivel) {
     this.vida = salud;
     this.nivel = nivel;
 }
+//===========================================================================================================================================//
+
+// =============================== VARIABLES GLOBALES/ estado de juego ===============================
 
 // ==== CREAR JUGADOR Y ENEMIGOS ====
 let jugador;
@@ -50,38 +60,111 @@ let enemigos = [
 let enemigoActualIndex = 0;
 let enemigoActual = enemigos[enemigoActualIndex];
 
-// ==== GUARDAR Y CARGAR PARTIDA ====
-let guardarPartida = () => {
-    localStorage.setItem("jugador", JSON.stringify(jugador));
-    localStorage.setItem("enemigos", JSON.stringify(enemigos));
-    localStorage.setItem("enemigoIndex", enemigoActualIndex);
-    registrarEnHistorial("Partida guardada exitosamente.");
-};
+//===========================================================================================================================================//
+// =============================== utilidades/helpers ===============================
 
-let cargarpartida = () => {
-    let jugadorGuardado = localStorage.getItem("jugador");
-    let enemigosGuardados = localStorage.getItem("enemigos");
-    let indexGuardado = localStorage.getItem("enemigoIndex");
-
-    if (jugadorGuardado && enemigosGuardados) {
-        let datosJugador = JSON.parse(jugadorGuardado);
-        jugador = new Jugador( datosJugador.nombre, datosJugador.daño, datosJugador.defensa, datosJugador.vida, datosJugador.nivel);
-        enemigos = JSON.parse(enemigosGuardados).map(
-            (e) => new Enemigo(e.nombre, e.daño, e.defensa, e.vida, e.nivel)
-        );
-        
-        enemigoActualIndex = parseInt(indexGuardado, 10);
-        enemigoActual = enemigos[enemigoActualIndex];
-        registrarEnHistorial("Partida cargada exitosamente.");
-        actualizarUI();
-    } else {
-        registrarEnHistorial("No hay partidas guardadas.");
+// ==== REGISTRAR EN HISTORIAL ====
+function registrarEnHistorial(mensaje) {
+    const li = document.createElement("li");
+    li.textContent = mensaje;
+    const historial = document.getElementById("historial");
+    historial.appendChild(li);
+    while (historial.children.length > 15) {
+        historial.removeChild(historial.firstChild);
     }
-};
+}
+
+// ==== promesa de espera ====
+function wait(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+//= bandera boleana bloqueo ui
+let uiBloqueada = false;
 
 // ==== BANDERA DE HUIDA ====
 let abandono = false;
 
+//==== usuario actual ====
+let usuarioActual = "null";
+
+//===========================================================================================================================================//
+// ==== GUARDAR Y CARGAR PARTIDA ====
+function guardarPartida() {
+    if (!usuarioActual) return;
+    localStorage.setItem(`usuario:${usuarioActual}:jugador`, JSON.stringify(jugador));
+    localStorage.setItem(`usuario:${usuarioActual}:enemigos`, JSON.stringify(enemigos));
+    localStorage.setItem(`usuario:${usuarioActual}:enemigoIndex`, enemigoActualIndex);
+    swal.fire("Partida guardada correctamente.");
+}
+
+function cargarpartida() {
+    if (!usuarioActual) return;
+    let jugadorGuardado = localStorage.getItem(`usuario:${usuarioActual}:jugador`);
+    let enemigosGuardados = localStorage.getItem(`usuario:${usuarioActual}:enemigos`);
+    let indexguardado = localStorage.getItem(`usuario:${usuarioActual}:enemigoIndex`);
+
+    if (jugadorGuardado && enemigosGuardados && indexguardado !== null) {
+        let datosjugador = JSON.parse(jugadorGuardado);
+        jugador = new Jugador(
+            datosjugador.nombre,
+            datosjugador.daño,
+            datosjugador.defensa,
+            datosjugador.vida,
+            datosjugador.nivel
+        );
+        enemigos = JSON.parse(enemigosGuardados).map((e => new Enemigo(e.nombre, e.daño, e.defensa, e.vida, e.nivel)));
+        enemigoActualIndex = parseInt(indexguardado, 10);
+        enemigoActual = enemigos[enemigoActualIndex];
+        registrarEnHistorial(`Partida de ${usuarioActual} cargada correctamente.`);
+        actualizarUI();
+    } else {
+        registrarEnHistorial(`No hay partida guardada para ${usuarioActual}.`);
+    }
+}
+
+function nuevaPartidaUsuario(nombre) {
+    jugador = new Jugador(nombre, 25, 15, 100, 1);
+    enemigos = [
+        new Enemigo("goblin con espada", 30, 5, 60, 1),
+        new Enemigo("goblin arquero", 25, 20, 20, 3),
+        new Enemigo("Hechicero goblin", 10, 5, 20, 5),
+        new Enemigo("hobgoblin", 20, 15, 30, 11),
+        new Enemigo("Sabio goblin", 40, 20, 30, 15),
+        new Enemigo("Rey goblin", 60, 55, 50, 20),
+        new Enemigo("Lobo", 4, 2, 10, 2),
+    ];
+    enemigoActualIndex = 0;
+    enemigoActual = enemigos[enemigoActualIndex];
+    registrarEnHistorial(`Nueva partida para ${nombre} iniciada.`);
+    actualizarUI();
+    guardarPartida();
+}
+
+    async function seleccionarUsuarioYCargar() {
+    const usuarios = obtenerUsuariosGuardados();
+    if (usuarios.length === 0) {
+        await swal.fire("No hay partidas guardadas", "Crear una nueva partida", "info");
+        return;        
+    }
+    const { value: usuario } = await swal.fire({
+        title: "seleccion de usuario",
+        input: "select",
+        inputOptions: usuarios.reduce((obj, u) => {
+            obj[u] = u;
+            return obj;
+        }, {}),
+        inputPlaceholder: "Elije tu usuario",
+        showCancelButton: true
+    });
+
+    if (usuario) {
+        usuarioActual = usuario;
+        cargarpartida();
+    }
+}
+//===========================================================================================================================================//
+//============================== UI ===============================
 // ==== ACTUALIZAR INTERFAZ ====
 function actualizarUI() {
     document.getElementById("Jnombre").innerText = jugador.nombre;
@@ -93,20 +176,19 @@ function actualizarUI() {
     document.getElementById("Enombre").innerText = enemigoActual.nombre;
     document.getElementById("Enivel").innerText = `Nivel: ${enemigoActual.nivel}`;
     document.getElementById("Evida").innerText = `Vida: ${enemigoActual.vida}`;
-    document.getElementById( "Edefensa").innerText = `Defensa: ${enemigoActual.defensa}`;
+    document.getElementById("Edefensa").innerText = `Defensa: ${enemigoActual.defensa}`;
     document.getElementById("Emana").innerText = `Daño: ${enemigoActual.daño}`;
 }
 
-function registrarEnHistorial(mensaje) {
-    const li = document.createElement("li");
-    li.textContent = mensaje;
-    const historial = document.getElementById("historial");
-    historial.appendChild(li);
-    while (historial.children.length > 15) {
-        historial.removeChild(historial.firstChild);
-    }
+// ==== DESACTIVAR BOTONES ====
+function desactivarBotones() {
+    document
+        .querySelectorAll("#acciones-combate button")
+        .forEach((boton) => (boton.disabled = true));
 }
 
+//===========================================================================================================================================//
+//============================== COMBATE ===============================
 // ==== TURNO DEL ENEMIGO ====
 function turnoEnemigo() {
     if (enemigoActual.vida > 0) {
@@ -126,6 +208,13 @@ function turnoEnemigo() {
     actualizarUI();
 }
 
+// versión asíncrona del turno del enemigo con espera
+async function turnoEnemigoAsync() {
+    await wait(3000); // espera 1 segundo
+    turnoEnemigo();
+    uiBloqueada = false; // desbloquear UI después del turno del enemigo
+}
+
 // ==== CAMBIO DE ENEMIGO ====
 function siguienteEnemigo() {
     enemigoActualIndex++;
@@ -140,9 +229,12 @@ function siguienteEnemigo() {
         desactivarBotones();
     }
 }
-
+//===========================================================================================================================================//
 // ==== EVENTOS DE BOTONES ====
-document.getElementById("atacar").addEventListener("click", () => {
+document.getElementById("atacar").addEventListener("click", async () => {
+    if (uiBloqueada) return; // prevenir múltiples clics
+    uiBloqueada = true; // bloquear UI
+
     registrarEnHistorial(jugador.atacar(enemigoActual));
     if (enemigoActual.vida <= 0) {
         registrarEnHistorial(`${enemigoActual.nombre} ha sido derrotado.`);
@@ -151,34 +243,42 @@ document.getElementById("atacar").addEventListener("click", () => {
         jugador.daño += 5;
         jugador.defensa += 2;
         siguienteEnemigo();
+        uiBloqueada = false; // desbloquear UI
     } else {
-        turnoEnemigo();
+        await turnoEnemigoAsync();
     }
     actualizarUI();
 });
 
-document.getElementById("curar").addEventListener("click", () => {
+document.getElementById("curar").addEventListener("click", async () => {
+    if (uiBloqueada) return; // prevenir múltiples clics
+    uiBloqueada = true; // bloquear UI  
     registrarEnHistorial(jugador.curarse());
-    turnoEnemigo();
+    await turnoEnemigoAsync();
     actualizarUI();
 });
 
-document.getElementById("huir").addEventListener("click", () => {
+document.getElementById("defender").addEventListener("click", async () => {
+    if (uiBloqueada) return; // prevenir múltiples clics
+    uiBloqueada = true; // bloquear UI  
+    jugador.defensa += 5;
+    registrarEnHistorial(
+        `${jugador.nombre} se pone en posición defensiva. Defensa +5 este turno.`
+    );
+    await turnoEnemigoAsync();
+    jugador.defensa -= 5;
+    actualizarUI();
+});
+
+document.getElementById("huir").addEventListener("click", async () => {
+    if (uiBloqueada) return; // prevenir múltiples clics
+    uiBloqueada = true; // bloquear UI
     registrarEnHistorial(
         `${jugador.nombre} huye del combate. Los enemigos celebran...`
     );
     abandono = true;
     desactivarBotones();
-});
-
-document.getElementById("defender").addEventListener("click", () => {
-    jugador.defensa += 5;
-    registrarEnHistorial(
-        `${jugador.nombre} se pone en posición defensiva. Defensa +5 este turno.`
-    );
-    turnoEnemigo();
-    jugador.defensa -= 5;
-    actualizarUI();
+    uiBloqueada = false; // desbloquear UI
 });
 
 document
@@ -186,24 +286,102 @@ document
     .addEventListener("click", guardarPartida);
 document
     .getElementById("cargar-partida")
-    .addEventListener("click", cargarpartida);
+    .addEventListener("click", seleccionarUsuarioYCargar);
 
-// ==== DESACTIVAR BOTONES ====
-function desactivarBotones() {
-    document
-        .querySelectorAll("#acciones-combate button")
-        .forEach((boton) => (boton.disabled = true));
+// ==== login usuario ====
+function obtenerUsuariosGuardados() {
+    const usuarios = [];
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith("usuario:") && key.endsWith(":jugador")) {
+            const nombre = key.split(":")[1];
+            usuarios.push(nombre);
+        }
+    }
+    return usuarios;
 }
 
+async function loginUsuario() {
+    const { value: accion } = await swal.fire({
+        title: "bienvenido",
+        text: "¿Quieres cargar una partida existente o empezar una nueva?",
+        input: "select",
+        inputOptions: {
+            cargar: "Cargar partida",
+            nueva: "Nueva partida",
+        },
+        inputValidator: (value) => {
+            if (!value) {
+                return "¡Necesitas elegir una opcion!";
+            }
+        },
+    });
+
+    if (accion === "cargar") {
+        const usuarios = obtenerUsuariosGuardados();
+        if (usuarios.length === 0) {
+            await swal.fire("No hay partidas guardadas", "Crear una nueva partida", "info");
+            return loginUsuario(); // reiniciar el proceso
+        }
+        const { value: usuario } = await swal.fire({
+            title: "seleccion de usuario",
+            input: "select",
+            inputOptions: usuarios.reduce((obj, u) => {
+                obj[u] = u;
+                return obj;
+            }, {}),
+            inputPlaceholder: "Elije tu usuario",
+            showCancelButton: true
+        });
+        if (usuario) {
+            usuarioActual = usuario;
+            cargarpartida();
+        } else {
+            loginUsuario(); // reiniciar el proceso
+        }
+    } else if (accion === "nueva") {
+        const { value: nombre } = await swal.fire({
+            title: "Nuevo usuario",
+            input: "text",
+            inputLabel: "Ingresa tu nombre de usuario",
+            inputPlaceholder: "Nombre de usuario",
+            inputValidator: (value) => !value && "¡Necesitas escribir un nombre de usuario!",
+        });
+
+        if (nombre) {
+            usuarioActual = nombre.trim();
+
+            if (localStorage.getItem(`usuario:${usuarioActual}:jugador`)) {
+                const { isConfirmed } = await swal.fire({
+                    title: `Usuario ${usuarioActual} ya existe`,
+                    text: "quieres cargar su partida guardada?",
+                    icon: "question",
+                    showCancelButton: true,
+                    confirmButtonText: "Sí, cargar",
+                    cancelButtonText: "No, sobreescribir",
+                });
+                if (isConfirmed) {
+                    cargarpartida();
+                } else {
+                    nuevaPartidaUsuario(usuarioActual);
+                }
+            }
+            else {
+                nuevaPartidaUsuario(usuarioActual);
+            }
+        } else {
+            loginUsuario(); // reiniciar el proceso
+        }
+    }
+}
+
+//===========================================================================================================================================//
 // ==== INICIO DEL JUEGO ====
-let nombreJugador = prompt("Introduce el nombre de tu personaje:");
-if (!nombreJugador) {
-    nombreJugador = "Heroe";
-}
-jugador = new Jugador(nombreJugador, 25, 15, 100, 1);
-actualizarUI();
-registrarEnHistorial(`Comienza la aventura de ${jugador.nombre}...`);
+loginUsuario();
 
-// ==== FUNCIÓN DE ORDEN SUPERIOR (ejemplo para entrega) ====
+// ==== Extras / debug ====
 console.log("Lista de enemigos:");
 enemigos.map((e) => e.nombre).forEach((nombre) => console.log(nombre));
+
+
+// fin del código
