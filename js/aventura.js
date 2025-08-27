@@ -1,12 +1,13 @@
 // simulador RPG interactivo adaptado a DOM y eventos
 // Autor: Brian (adaptado para entrega curso)
-
+//librerias
 
 // =============================== mensajes iniciales ===============================
 // sweetalert2 para prompts y alertas
 swal.fire("Bienvenido al juego de aventura RPG!");
 swal.fire("Instrucciones: Ataca, cura, defiende o huye. ¡Buena suerte!");
 
+import { enemigosCueva,BossCueva,enemigosBosque,BossBosque } from "./monstruos.js";
 
 //=============================== funciones constructoras ================================
 function Jugador(nombre, daño, defensa, vida, nivel) {
@@ -35,28 +36,13 @@ function Jugador(nombre, daño, defensa, vida, nivel) {
     };
 }
 
-function Enemigo(nombre, daño, defensa, salud, nivel) {
-    this.nombre = nombre;
-    this.daño = daño;
-    this.defensa = defensa;
-    this.vida = salud;
-    this.nivel = nivel;
-}
+
 //===========================================================================================================================================//
 
 // =============================== VARIABLES GLOBALES/ estado de juego ===============================
 
 // ==== CREAR JUGADOR Y ENEMIGOS ====
 let jugador;
-let enemigos = [
-    new Enemigo("goblin con espada", 30, 5, 60, 1),
-    new Enemigo("goblin arquero", 25, 20, 20, 3),
-    new Enemigo("Hechicero goblin", 10, 5, 20, 5),
-    new Enemigo("hobgoblin", 20, 15, 30, 11),
-    new Enemigo("Sabio goblin", 40, 20, 30, 15),
-    new Enemigo("Rey goblin", 60, 55, 50, 20),
-    new Enemigo("Lobo", 4, 2, 10, 2),
-];
 let enemigoActualIndex = 0;
 let enemigoActual = enemigos[enemigoActualIndex];
 
@@ -126,15 +112,8 @@ function cargarpartida() {
 function nuevaPartidaUsuario(nombre) {
     jugador = new Jugador(nombre, 25, 15, 100, 1);
     enemigos = [
-        new Enemigo("goblin con espada", 30, 5, 60, 1),
-        new Enemigo("goblin arquero", 25, 20, 20, 3),
-        new Enemigo("Hechicero goblin", 10, 5, 20, 5),
-        new Enemigo("hobgoblin", 20, 15, 30, 11),
-        new Enemigo("Sabio goblin", 40, 20, 30, 15),
-        new Enemigo("Rey goblin", 60, 55, 50, 20),
-        new Enemigo("Lobo", 4, 2, 10, 2),
-    ];
-    enemigoActualIndex = 0;
+        //cueva
+            enemigoActualIndex = 0;
     enemigoActual = enemigos[enemigoActualIndex];
     registrarEnHistorial(`Nueva partida para ${nombre} iniciada.`);
     actualizarUI();
