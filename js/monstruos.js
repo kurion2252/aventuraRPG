@@ -6,6 +6,7 @@ function Enemigo(nombre, daño, defensa, salud, nivel) {
     this.nivel = nivel;
 }
 // =============cueva=============
+
 const enemigosCueva = [
     //goblins
         new Enemigo("goblin con espada", 30, 5, 60, 1),
@@ -52,6 +53,12 @@ const BossBosque =[
         new Enemigo("Dragón legendario", 150, 100, 500, 40),
 ]
 
+const mounstruos = [
+    ...enemigosCueva,
+    ...BossCueva,
+    ...enemigosBosque,
+    ...BossBosque,
+];
 
 // ============= exportaciones =============
-export {enemigosCueva, BossCueva, enemigosBosque, BossBosque};
+export {mounstruos,enemigosCueva, BossCueva, enemigosBosque, BossBosque, Enemigo};
