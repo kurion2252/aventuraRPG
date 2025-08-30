@@ -1,0 +1,55 @@
+body {
+    background: url(https://res.cloudinary.com/dseriytpl/image/upload/v1754840558/fondo_pagina_dq8fb9.jpg) no-repeat center center fixed;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+    font-size: x-large;
+    ;
+}
+
+h1,
+h2 {
+    text-align: center;
+    margin: 10px 0;
+}
+
+h1 {
+    font-size: 5rem;
+    color: #ffd700;
+    text-shadow: 2px 2px 5px #000000;
+    font-style: italic;
+}
+
+p {
+    background-color: #000000b3;
+    text-align: center;
+    color: #90ee90;
+    border-radius: 10px;
+    padding: 10px;
+    max-width: 800px;
+    margin: 10px auto;
+}
+
+#funcionespartida {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin: 20px auto;
+    size: 2rem;
+}
+
+
+/*final*/
+body::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.6); /* Ajusta el 0.6 para más o menos oscuridad */
+    z-index: 0;
+    pointer-events: none;
+}
+body > * {
+    position: relative;
+    z-index: 1;
+}

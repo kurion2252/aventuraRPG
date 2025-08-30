@@ -2,10 +2,25 @@
 // Autor: Brian (adaptado para entrega curso)
 //librerias
 
+
+
 // =============================== mensajes iniciales ===============================
 // sweetalert2 para prompts y alertas
-swal.fire("Bienvenido al juego de aventura RPG!");
-swal.fire("Instrucciones: Ataca, cura, defiende o huye. ¡Buena suerte!");
+function mostrarSweetAlert(config) {
+    // Crear overlay oscuro
+    let overlay = document.createElement("div");
+    overlay.className = "fondo-oscuro-swal";
+    document.body.appendChild(overlay);
+
+    // Mostrar SweetAlert
+    swal.fire(config).then(() => {
+        // Quitar overlay cuando se cierra el SweetAlert
+        overlay.remove();
+    });
+}
+
+mostrarSweetAlert({ title: "Bienvenido al juego de aventura RPG!" });
+mostrarSweetAlert({ title: "Instrucciones: Ataca, cura, defiende o huye. ¡Buena suerte!" });
 
 import { mounstruos,enemigosCueva, BossCueva, enemigosBosque, BossBosque, Enemigo } from "./monstruos.js";
 
@@ -16,6 +31,7 @@ function Jugador(nombre, daño, defensa, vida, nivel) {
     this.defensa = defensa;
     this.vida = vida;
     this.nivel = nivel;
+    this.genero = "genero";
 
     this.atacar = function (enemigos) {
         let dañoreal = this.daño - enemigos.defensa;
@@ -75,12 +91,29 @@ let abandono = false;
 //==== usuario actual ====
 let usuarioActual = "null";
 
+// Mezclar (shuffle) un array
+function mezclarArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+// Obtener enemigos según el rango de nivel del héroe
+function obtenerRangoEnemigos(nivelHeroe) {
+    const rangoInicio = Math.floor((nivelHeroe - 1) / 3) * 3 + 1;
+    const rangoFin = rangoInicio + 2;
+    return mounstruos.filter(m => m.nivel >= rangoInicio && m.nivel <= rangoFin);
+}
+
 // reactivar botones
 function activarBotones() {
     document
         .querySelectorAll("#acciones-combate button")
         .forEach((boton) => (boton.disabled = false));
 }
+
 
 //===========================================================================================================================================//
 // ==== GUARDAR,CARGAR y BORRAR PARTIDA ====
@@ -89,7 +122,7 @@ function guardarPartida() {
     localStorage.setItem(`usuario:${usuarioActual}:jugador`, JSON.stringify(jugador));
     localStorage.setItem(`usuario:${usuarioActual}:enemigos`, JSON.stringify(enemigos));
     localStorage.setItem(`usuario:${usuarioActual}:enemigoIndex`, enemigoActualIndex);
-    swal.fire("Partida guardada correctamente.");
+    mostrarSweetAlert({ title: "Partida guardada correctamente." });
 }
 
 function cargarpartida() {
@@ -109,13 +142,13 @@ function cargarpartida() {
 
 
     } else {
-        swal.fire("No se encontró una partida guardada para este usuario.");
+        mostrarSweetAlert({ title: "No se encontró una partida guardada para este usuario." });
     }
 }
 
 
-function nuevaPartidaUsuario(nombre) {
-    jugador = new Jugador(nombre, 25, 25, 100, 1);
+function nuevaPartidaUsuario(nombre, genero = "otro") {
+    jugador = new Jugador(nombre, 25, 25, 100, 1, genero);
     enemigos = mounstruos.map(m => new Enemigo(m.nombre, m.daño, m.defensa, m.vida, m.nivel));
 
         //reiniciar indices y estados
@@ -125,6 +158,18 @@ function nuevaPartidaUsuario(nombre) {
         actualizarUI();
         guardarPartida();
         abandono = false;
+}
+
+// Actualizar enemigos automáticamente al subir de nivel
+function subirNivel() {
+    jugador.nivel += 1;
+    const enemigosFiltrados = obtenerRangoEnemigos(jugador.nivel);
+    enemigos = mezclarArray(enemigosFiltrados.map(m => new Enemigo(m.nombre, m.daño, m.defensa, m.vida, m.nivel)));
+    enemigoActualIndex = 0;
+    enemigoActual = enemigos[enemigoActualIndex];
+    registrarEnHistorial(`¡${jugador.nombre} subió a nivel ${jugador.nivel}! Nuevos enemigos aparecen.`);
+    actualizarUI();
+    guardarPartida();
 }
 
 async function seleccionarUsuarioYCargar() {
@@ -172,7 +217,7 @@ function borrarPartida() {
     localStorage.removeItem(`usuario:${usuarioActual}:jugador`);
     localStorage.removeItem(`usuario:${usuarioActual}:enemigos`);
     localStorage.removeItem(`usuario:${usuarioActual}:enemigoIndex`);
-    swal.fire("Partida borrada correctamente. Elige una nueva opción.");
+    mostrarSweetAlert({ title: "Partida borrada correctamente. Elige una nueva opción." });
 
     jugador = undefined;
     enemigos = [];
@@ -201,6 +246,7 @@ function actualizarUI() {
     document.getElementById("Jvida").innerText = `Vida: ${jugador.vida}`;
     document.getElementById("Jdefensa").innerText = `Defensa: ${jugador.defensa}`;
     document.getElementById("Jmana").innerText = `Daño: ${jugador.daño}`;
+    document.getElementById("Jgenero").innerText = `Género: ${jugador.genero}`;
 
     document.getElementById("Enombre").innerText = enemigoActual.nombre;
     document.getElementById("Enivel").innerText = `Nivel: ${enemigoActual.nivel}`;
@@ -248,7 +294,7 @@ async function turnoEnemigoAsync() {
 function siguienteEnemigo() {
     enemigoActualIndex++;
     if (enemigoActualIndex >= enemigos.length) {
-        swal.fire("¡Has derrotado a todos los enemigos! Victoria total.");
+        mostrarSweetAlert({ title: "¡Has derrotado a todos los enemigos! Victoria total." });
         desactivarBotones();
         return;
     }
@@ -353,14 +399,14 @@ function obtenerUsuariosGuardados() {
 
 async function loginUsuario() {
     const usuarios = obtenerUsuariosGuardados();
-    // Opciones dinámicas según si hay partidas guardadas
     const opciones = usuarios.length > 0
         ? { cargar: "Cargar partida", nueva: "Nueva partida" }
         : { nueva: "Nueva partida" };
 
-    const { value: accion } = await swal.fire({
+    const { value: accion } = await mostrarSweetAlert({
         title: "bienvenido",
         text: "¿Quieres cargar una partida existente o empezar una nueva?",
+        background: "url('https://res.cloudinary.com/dseriytpl/image/upload/v1756560407/fondo_login_pergamino_zk5ffo.webp') no-repeat center center/cover",     
         input: "select",
         inputOptions: opciones,
         inputValidator: (value) => {
@@ -372,7 +418,7 @@ async function loginUsuario() {
 
     if (accion === "cargar") {
         const usuarios = obtenerUsuariosGuardados();
-        const { value: usuario } = await swal.fire({
+        const { value: usuario } = await mostrarSweetAlert({
             title: "seleccion de usuario",
             input: "select",
             inputOptions: usuarios.reduce((obj, u) => {
@@ -389,7 +435,7 @@ async function loginUsuario() {
             loginUsuario(); // reiniciar el proceso
         }
     } else if (accion === "nueva") {
-        const { value: nombre } = await swal.fire({
+        const { value: nombre } = await mostrarSweetAlert({
             title: "Nuevo usuario",
             input: "text",
             inputLabel: "Ingresa tu nombre de usuario",
@@ -401,7 +447,7 @@ async function loginUsuario() {
             usuarioActual = nombre.trim();
 
             if (localStorage.getItem(`usuario:${usuarioActual}:jugador`)) {
-                const { isConfirmed } = await swal.fire({
+                const { isConfirmed } = await mostrarSweetAlert({
                     title: `Usuario ${usuarioActual} ya existe`,
                     text: "quieres cargar su partida guardada?",
                     icon: "question",
@@ -435,7 +481,7 @@ enemigos.map((e) => e.nombre).forEach((nombre) => console.log(nombre));
 
 // fin del código
 document.getElementById("nueva-partida").addEventListener("click", async () => {
-    const { value: nombre } = await swal.fire({
+    const { value: nombre } = await mostrarSweetAlert({
         title: "Nombre de jugador",
         input: "text",
         inputLabel: "Ingresa tu nombre para la nueva partida",
@@ -445,7 +491,18 @@ document.getElementById("nueva-partida").addEventListener("click", async () => {
         },
     });
     if (nombre) {
-        usuarioActual = nombre.trim(); // <-- agrega esta línea
+        const { value: genero } = await mostrarSweetAlert({
+            title: "Género del personaje",
+            input: "select",
+            inputOptions: { masculino: "Masculino", femenino: "Femenino", otro: "Otro" },
+            inputPlaceholder: "Elige tu género",
+            showCancelButton: true,
+        });
+        usuarioActual = nombre.trim();
         nuevaPartidaUsuario(usuarioActual);
     }
 });
+
+
+
+

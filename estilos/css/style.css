@@ -162,3 +162,11 @@ border-bottom: 1px solid #555;}
   color: #000000;
   font-size: 0.9rem;
 }
+
+.fondo-oscuro-swal {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.9);
+  z-index: 9;
+  pointer-events: none;
+}
